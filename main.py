@@ -6,7 +6,7 @@ from config import Config
 import aioschedule as schedule
 
 async def init_db():
-    db = DB(host=Config.host, port=Config.port, login=Config.login, password=Config.password, database = Config.database)
+    db = DB(host=Config.HOST, port=Config.PORT, login=Config.LOGIN, password=Config.PASSWORD, database = Config.DATABASE)
     await db.init()
     user_storage = UserStorage(db)
     await user_storage.init()

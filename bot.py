@@ -1,5 +1,4 @@
 import typing
-import aiofiles
 import aiogram
 from config import Config
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
