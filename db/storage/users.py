@@ -28,7 +28,7 @@ class UserStorage():
         data = await self._db.fetchrow(f"SELECT * FROM {self.__table} WHERE id = $1", id)
         if data is None:
             return None
-        return User(data[0], data[1], data[2], data[3], data[4])
+        return User(data[0], data[1])
 
     async def promote_to_admin(self, id:int):
         await self._db.execute(f"UPDATE {self.__table} SET role = $1 WHERE id = $2", User.ADMIN, id)
@@ -44,8 +44,8 @@ class UserStorage():
 
     async def create(self, user:User):
         await self._db.execute(f'''
-            INSERT INTO {self.__table} (id, role, actual_limit, daily_limit, present) VALUES ($1, $2, $3, $4, $5)
-        ''', user.id, user.role, user.actual_limit, user.daily_limit, user.present)
+            INSERT INTO {self.__table} (id, role) VALUES ($1, $2)
+        ''', user.id, user.role)
 
     async def get_all_members(self) -> List[User]| None:
         data = await self._db.fetch(f'''
@@ -53,7 +53,7 @@ class UserStorage():
         ''')
         if data is None:
             return None
-        return [User(user_data[0], user_data[1], user_data[2], user_data[3], user_data[4]) for user_data in data]
+        return [User(user_data[0], user_data[1]) for user_data in data]
 
     async def get_user_amount(self) -> int:
         return await self._db.fetchval(f"SELECT COUNT(*) FROM {self.__table}")
