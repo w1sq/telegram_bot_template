@@ -29,7 +29,7 @@ class TG_Bot:
         print("Bot has started")
         await self._dispatcher.start_polling()
 
-    async def _show_menu(self, message: aiogram.types.Message):
+    async def _show_menu(self, message: aiogram.types.Message, user: User):
         await message.answer("Добро пожаловать")
 
     def _init_handler(self):
@@ -43,6 +43,7 @@ class TG_Bot:
             if user is None:
                 user = User(id=message.chat.id, role=User.USER)
                 await self._user_storage.create(user)
+
             if user.role != User.BLOCKED:
                 await func(message, user)
 

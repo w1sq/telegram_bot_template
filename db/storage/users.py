@@ -29,7 +29,7 @@ class UserStorage:
         """
         )
 
-    async def get_by_id(self, user_id: int) -> User | None:
+    async def get_by_id(self, user_id: int) -> User:
         data = await self._db.fetchrow(
             f"SELECT * FROM {self.__table} WHERE id = $1", user_id
         )
@@ -47,7 +47,7 @@ class UserStorage:
             f"UPDATE {self.__table} SET role = $1 WHERE id = $2", User.USER, user_id
         )
 
-    async def get_role_list(self, role: str) -> List[int] | None:
+    async def get_role_list(self, role: str) -> List[int]:
         roles = await self._db.fetch(
             f"SELECT * FROM {self.__table} WHERE role = $1", role
         )
@@ -64,7 +64,7 @@ class UserStorage:
             user.role,
         )
 
-    async def get_all_members(self) -> List[User] | None:
+    async def get_all_members(self) -> List[User]:
         data = await self._db.fetch(
             f"""
             SELECT * FROM {self.__table}
