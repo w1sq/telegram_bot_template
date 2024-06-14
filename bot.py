@@ -1,25 +1,25 @@
 import typing
+
 import aiogram
-from config import Config
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from db.storage import UserStorage, User
+from aiogram.filters.command import Command
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
 from aiogram.types import (
     ReplyKeyboardMarkup,
     KeyboardButton,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
 )
+
+from db.storage import UserStorage, User
 
 
 class TG_Bot:
-    def __init__(self, user_storage: UserStorage):
+    def __init__(self, bot_token: str, user_storage: UserStorage):
         self._user_storage: UserStorage = user_storage
-        self._bot: aiogram.Bot = aiogram.Bot(token=Config.TGBOT_API_KEY)
-        self._storage: MemoryStorage = MemoryStorage()
-        self._dispatcher: aiogram.Dispatcher = aiogram.Dispatcher(
-            self._bot, storage=self._storage
+        self._bot: aiogram.Bot = aiogram.Bot(
+            token=bot_token, default=DefaultBotProperties(parse_mode="HTML")
         )
+        self._storage: MemoryStorage = MemoryStorage()
+        self._dispatcher: aiogram.Dispatcher = aiogram.Dispatcher(storage=self._storage)
         self._create_keyboards()
 
     async def init(self):
@@ -27,14 +27,17 @@ class TG_Bot:
 
     async def start(self):
         print("Bot has started")
-        await self._dispatcher.start_polling()
+        await self._dispatcher.start_polling(self._bot)
 
     async def _show_menu(self, message: aiogram.types.Message, user: User):
-        await message.answer("Добро пожаловать")
+        await message.answer("Добро пожаловать", reply_markup=self._menu_keyboard_user)
 
     def _init_handler(self):
-        self._dispatcher.register_message_handler(
-            self._user_middleware(self._show_menu), commands=["start", "menu"]
+        self._dispatcher.message.register(
+            self._user_middleware(self._show_menu), Command(commands=["start", "menu"])
+        )
+        self._dispatcher.message.register(
+            self._user_middleware(self._show_menu), aiogram.F.text == "Menu"
         )
 
     def _user_middleware(self, func: typing.Callable) -> typing.Callable:
@@ -57,6 +60,7 @@ class TG_Bot:
         return wrapper
 
     def _create_keyboards(self):
-        self._menu_keyboard_user = ReplyKeyboardMarkup(resize_keyboard=True).row(
-            KeyboardButton("Меню")
+        self._menu_keyboard_user = ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="Menu")]],
+            resize_keyboard=True,
         )

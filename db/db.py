@@ -1,5 +1,6 @@
-import asyncpg
 from typing import List, Any
+
+import asyncpg
 
 
 class DB:
