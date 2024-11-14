@@ -1,7 +1,7 @@
 from typing import List
 from dataclasses import dataclass
 
-from db.db import DB
+from db.src.db import DB
 
 
 @dataclass

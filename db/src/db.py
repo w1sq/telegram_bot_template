@@ -44,3 +44,6 @@ class DB:
         async with self._pool.acquire() as conn:
             async with conn.transaction():
                 return await conn.fetchval(query, *params)
+
+    async def close(self):
+        await self._pool.close()

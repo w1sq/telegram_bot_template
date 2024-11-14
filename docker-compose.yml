@@ -1,0 +1,35 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    volumes:
+      - ./.env:/app/.env:ro
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - bot_network
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_USER=${LOGIN}
+      - POSTGRES_DB=${DATABASE}
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - bot_network
+
+volumes:
+  postgres_data:
+
+networks:
+  bot_network:
+    driver: bridge

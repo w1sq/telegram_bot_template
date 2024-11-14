@@ -9,7 +9,7 @@ from aiogram.types import (
     KeyboardButton,
 )
 
-from db.storage import UserStorage, User
+from db.src.storage import UserStorage, User
 
 
 class TG_Bot:
@@ -31,6 +31,8 @@ class TG_Bot:
 
     async def _show_menu(self, message: aiogram.types.Message, user: User):
         await message.answer("Добро пожаловать", reply_markup=self._menu_keyboard_user)
+        if user:
+            await message.answer(f"Ваш id: {user.id}")
 
     def _init_handler(self):
         self._dispatcher.message.register(
