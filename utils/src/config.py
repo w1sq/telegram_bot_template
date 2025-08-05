@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     redis_host: SecretStr
     redis_port: int
 
+    debug: bool = True
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
