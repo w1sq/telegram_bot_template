@@ -15,10 +15,9 @@ class RedisManager:
 
     async def init(self) -> None:
         if self._redis is None:
-            self._redis = Redis.from_url(
-                str(settings.redis_url.get_secret_value()),
-                encoding="utf-8",
-                decode_responses=True,
+            self._redis = Redis(
+                host=settings.redis_host.get_secret_value(),
+                port=settings.redis_port,
             )
 
     async def ping(self) -> None:
