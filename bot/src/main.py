@@ -1,36 +1,42 @@
 import asyncio
+import logging
+import os
 
-from db.src.db import DB
-from bot.src.bot import TG_Bot
-from db.src.storage import UserStorage
-from utils.src.config_reader import config
+from bot import BotApp
+from db import db_manager
+
+
+def setup_logging() -> logging.Logger:
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    c_handler = logging.StreamHandler()
+    c_handler.setLevel(logging.DEBUG)
+
+    os.makedirs("/app/logs", exist_ok=True)
+    f_handler = logging.FileHandler("/app/logs/bot.log")
+    f_handler.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    c_handler.setFormatter(formatter)
+    f_handler.setFormatter(formatter)
+
+    logger.addHandler(c_handler)
+    logger.addHandler(f_handler)
+
+    return logger
 
 
 async def main():
-    db = DB(
-        host=config.host.get_secret_value(),
-        port=config.port.get_secret_value(),
-        login=config.login.get_secret_value(),
-        password=config.password.get_secret_value(),
-        database=config.database.get_secret_value(),
-    )
-    await db.init()
-
-    user_storage = UserStorage(db)
-    await user_storage.init()
-
-    bot = TG_Bot(
-        bot_token=config.tgbot_api_key.get_secret_value(),
-        user_storage=user_storage,
-    )
-    await bot.init()
+    logger = setup_logging()
+    bot = BotApp(db_manager, logger)
 
     try:
         await bot.start()
-    except Exception as e:
-        print(f"Bot error: {e}")
-    finally:
-        await db.close()
+    except (KeyboardInterrupt, SystemExit):
+        logger.info("Bot stopped!")
 
 
 if __name__ == "__main__":

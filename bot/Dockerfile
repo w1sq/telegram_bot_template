@@ -1,29 +1,22 @@
-FROM python:3.12-slim
+FROM python:3.12-slim as builder
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    python3-dev \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+COPY bot bot
+COPY db db
+COPY utils utils
 
-# Copy only requirements first to leverage Docker cache
-COPY db/setup.py db/setup.py
-COPY utils/setup.py utils/setup.py
-COPY bot/setup.py bot/setup.py
+RUN pip install --no-cache-dir -e bot/
+RUN pip install --no-cache-dir -e db/
+RUN pip install --no-cache-dir -e utils/
 
-# Install dependencies
-RUN pip install --no-cache-dir \
-    -e db \
-    -e utils \
-    -e bot
+FROM python:3.12-slim
 
-# Copy the rest of the application
-COPY . .
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app/bot/src:$PYTHONPATH
 
-# Set Python path
-ENV PYTHONPATH=/app
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /app /app
 
-CMD ["python", "-m", "bot.src.main"]
+CMD ["python", "bot/src/main.py"]
