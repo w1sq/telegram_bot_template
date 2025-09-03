@@ -6,9 +6,9 @@ from aiogram.types import Message
 
 from filters import IsUser
 from db import UserRepository
-from keyboards import get_main_menu_keyboard
+from keyboards.user import get_main_menu_keyboard
 
-router = Router(name="article_router")
+router = Router(name="user_router")
 router.message.filter(IsUser())
 
 
