@@ -22,10 +22,3 @@ class UserRepository(BaseRepository[User]):
         statement = statement.offset(skip).limit(limit)
         result = await self.session.exec(statement)
         return result.all()
-
-    async def get(self, id: int, with_channels: bool = False) -> Optional[User]:
-        statement = select(self.model).where(self.model.id == id)
-        if with_channels:
-            statement = statement.options(selectinload(self.model.channels))
-        result = await self.session.exec(statement)
-        return result.one_or_none()
